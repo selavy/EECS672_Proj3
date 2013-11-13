@@ -18,26 +18,56 @@ using namespace std;
 
 /* static */ GLint GeneralMV::ppuLoc_M4x4_wc_ec = -1;
 /* static */ GLint GeneralMV::ppuLoc_M4x4_ec_lds = -1;
-/* static */ GLint GeneralMV::ppuLoc_lightModel = -1;
-/* static */ GLint GeneralMV::ppuLoc_kd = -1;
+
+// TODO: (high priority) ** DONE **
+// remove ppuLoc_lightModel
+
 /* static */ GLint GeneralMV::pvaLoc_wcPosition = -1;
 /* static */ GLint GeneralMV::pvaLoc_wcNormal = -1;
+
+// TODO: (high priority)  ** DONE **
+// add phong light model location vars
+/********************* PHONG LIGHTING MODEL LOC VARS *********/
+/* static */ GLint GeneralMV::ppuLoc_lightPosition = -1;
+/* static */ GLint GeneralMV::ppuLoc_lightStrength = -1;
+/* static */ GLint GeneralMV::ppuLoc_actualNumLights = -1;
+/* static */ GLint GeneralMV::ppuLoc_globalAmbient = -1;
+/* static */ GLint GeneralMV::ppuLoc_ka = -1;
+/* static */ GLint GeneralMV::ppuLoc_kd = -1;
+/* static */ GLint GeneralMV::ppuLoc_ks = -1;
+/* static */ GLint GeneralMV::ppuLoc_m = -1;
+/*********************     END PHONG LOC VARS    *************/
 
 /* static */ vec3 GeneralMV::_eye = { 0.0f, 0.0f, 1.0f };
 
 /* static */ vec3 GeneralMV::_up = { 0.0f, 1.0f, 0.0f }; // always up will be the y-axis
 /* static */ vec3 GeneralMV::_center = { 0.0f, 0.0f, 0.0f }; // for now just the origin
 
-// TODO: (high priority)
-// Add 2 more light sources
-// TODO: (high priority)
-// Implement full Phong Lighting model
-/* static */ vec3 GeneralMV::_lightloc = { 0.0f, 0.0f, 1.0f }; // for now directly from the eye location
+// TODO: (high priority) ** DONE **
+// Add phong light model variables 
+// TODO: (med priority)
+// select good locations and strengths
+/*********************** PHONG LIGHTING MODEL VARIABLES *******/
+/* static */ vec4 GeneralMV::_lightPosition[numLights] = {
+  { -1.0, 0.0, 1.0, 0.0 }, // source 0: directional
+  {  0.0, 1.0, 1.0, 0.0 }, // source 1: directional
+  {  0.0, 0.0, 5.0, 1.0 }  // source 2: positional
+};
+/* static */ float GeneralMV::_lightStrength[3 * numLights] = {
+  1.0, 1.0, 1.0, // source 0: 100% strength white
+  0.4, 0.4, 0.4, // source 1:  40% strength white
+  0.8, 0.8, 0.0  // source 2:  80% strength yellow
+};
+/* static */ vec4 GeneralMV::_ambientStrength = { 0.15, 0.15, 0.15, 1.0 }; // assumed ambient light
+/********************** END PHONG VARS ************************/
+
+// TODO: (high priority) ** DONE **
+// remove _lightloc
 
 /* static */ vec3 GeneralMV::_ecmin = { -1.0, -1.0f, -1.0f };
 /* static */ vec3 GeneralMV::_ecmax = {  1.0f, 1.0f,  1.0f };
 
-// TODO:
+// TODO: (med priority)
 // Change this to perspective (high priority)
 /* static */ GeneralMV::PROJECTION_TYPE GeneralMV::_proj_type = ORTHOGONAL;
 /* static */ float GeneralMV::_r = 0.0f;
@@ -56,12 +86,9 @@ GeneralMV::GeneralMV()
 
 GeneralMV::~GeneralMV()
 {
-  // since this is the base class
-  // the destructor of the derived class
-  // will be called first.
-  // so it is the responsibility of the
-  // derived class to delete
-  // its vao and vbo variables
+  // since this is the base class the destructor of the derived class
+  // will be called first. so it is the responsibility of the
+  // derived class to delete its vao and vbo variables
   if( --GeneralMV::numInstances == 0 )
     {
       GeneralMV::shaderIF->destroy();
@@ -90,7 +117,7 @@ void GeneralMV::printBox()
 
 void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
 {
-// TODO: (med priority)
+// TODO: (med priority) ** MOVED **
 // must calculate a bounding sphere and update the projection matrix
 // when the screen is moved.
 
@@ -192,6 +219,8 @@ _eye[2] = -1.0f * GeneralMV::_r * ZEYEMULTIPLIER;
   printBox();
 } /* end GeneralMV::handleCommand() */
 
+// TODO: (high priority)
+// Calculate a bounding sphere to determine bounding box for projection functions
 void GeneralMV::calcBoundingSphere()
 {
   // get the region of interest from the controller
@@ -248,12 +277,15 @@ void GeneralMV::calcBoundingSphere()
 void GeneralMV::setECMinMax()
 {
   calcBoundingSphere();
+
   // start with (-r, r, -r, r) for (xmin, xmax, ymin, ymax)
   _ecmin[0] = -1.0f * _r;
   _ecmin[1] = -1.0f * _r;
   _ecmax[0] = GeneralMV::_r;
   _ecmax[1] = GeneralMV::_r;
 
+  // TODO: (high priority) ** DONE **
+  // adjust limits to keep VAR the same
   // then adjust to keep viewport aspect ratio the same
   // VAR = screen_y / screen_x
   double VAR = Controller::getCurrentController()->getViewportAspectRatio();
@@ -287,7 +319,6 @@ void GeneralMV::setECMinMax()
   for( short i = 0; i < 3; ++i )
     cout << "(" << _ecmin[i] << ", " << _ecmax[i] << ")" << endl;
 #endif
-
 } /* end GeneralMV::setECMinMax() */
 
 void GeneralMV::getMatrices( double limits[6] )
@@ -297,6 +328,8 @@ void GeneralMV::getMatrices( double limits[6] )
   //   doesn't seem to be facilitated here. So the models
   //   are just created in world coordinates
 
+  // TODO: (high priority) ** DONE **
+  // Generate _ecmin, _ecmax based upon bounding sphere
   // set the Eye Coordinate minimums and maximums using a bounding sphere
   setECMinMax();
   printEyeLoc();
@@ -310,8 +343,7 @@ void GeneralMV::getMatrices( double limits[6] )
 	       _model_view
 	       );
 
-  // TODO: (high priority)
-  // Generate _ecmin, _ecmax based upon bounding sphere
+
 
   // TODO: (high priority)
   // Change the projection matrix based upon _proj_type
@@ -334,35 +366,83 @@ void GeneralMV::getMatrices( double limits[6] )
   //	  perspective( zpp, xmin, xmax, ymin, ymax, zmin, zmax, m[] ); length(m) == 16
   //  }
   //
+
   
   glUniformMatrix4fv( GeneralMV::ppuLoc_M4x4_wc_ec, 1, GL_FALSE, _model_view );
   glUniformMatrix4fv( GeneralMV::ppuLoc_M4x4_ec_lds, 1, GL_FALSE, _projection );
 } /* end GeneralMV::getMatrices() */
 
+// TODO: (high priority)
+// create sendPhongLightModel()
 /**
- * The lighting model for this project
- * is a very simple diffusive light model.
+ * send the phong lighting model to the GPU
+ * ASSUMES the MV matrix has been updated before this function was called
  */
-void GeneralMV::sendLightSource(
-				vec4 kd    //!> The base color of the object
-				)
+void GeneralMV::sendPhongLightModel( const vec4& ka, const vec4& kd, const vec4& ks, const float m )
 {
-  // TODO: (high priority)
-  // Implement full Phong Lighting model with 3 light sources (2 direction, 1 positional)
-  glUniform4fv( GeneralMV::ppuLoc_kd, 1, kd );
-  glUniform3fv( GeneralMV::ppuLoc_lightModel, 1, _lightloc );
-} /* end GeneralMV::sendLightSource() */
+  float lightPositionInEC[4 * numLights];
+
+  // convert the light sources to Eye Coordinates
+  for( short i = 0; i < numLights; ++i )
+    {
+      if( _lightPosition[i][4] == 0.0f )
+	{
+	  // already in eye coordinates
+	  lightPositionInEC[i] = _lightPosition[i][0];
+	  lightPositionInEC[i+1] = _lightPosition[i][1];
+	  lightPositionInEC[i+2] = _lightPosition[i][2];
+	  lightPositionInEC[i+3] = _lightPosition[i][3];
+	  continue;
+	}
+      
+      cryph::AffVector tmpLightPosition( _lightPosition[i] );
+      cryph::Matrix4x4 wcToECMat( _model_view );
+
+      cryph::AffVector ecLightPos = wcToECMat * tmpLightPosition;
+      ecLightPos.vComponents( lightPositionInEC, 3 * i );
+    }
+
+  // TODO: (high priority) ** DONE **
+  // send light positions in EC
+  glUniform4fv( ppuLoc_lightPosition, numLights, lightPositionInEC );
+  glUniform3fv( ppuLoc_lightStrength, numLights, _lightStrength );
+  glUniform1i( ppuLoc_actualNumLights, numLights );
+  glUniform3fv( ppuLoc_globalAmbient, 1, _ambientStrength );
+
+  glUniform4fv( ppuLoc_ka, 1, ka );
+  glUniform4fv( ppuLoc_kd, 1, kd );
+  glUniform4fv( ppuLoc_ks, 1, ks );
+  glUniform1f( ppuLoc_m, m );
+} /* end GeneralMV::sendPhongLightModel() */
+
+// TODO: (high priority) ** DONE **
+// remove sendLightSource
 
 void GeneralMV::fetchGLSLVariableLocations()
 {
   if( GeneralMV::shaderProgram > 0 )
     {
-      GeneralMV::ppuLoc_M4x4_wc_ec = ppUniformLocation( shaderProgram, "M4x4_wc_ec" );
-      GeneralMV::ppuLoc_M4x4_ec_lds = ppUniformLocation( shaderProgram, "M4x4_ec_lds" );
-      GeneralMV::ppuLoc_kd = ppUniformLocation( shaderProgram, "kd" );
-      GeneralMV::ppuLoc_lightModel = ppUniformLocation( shaderProgram, "lightModel" );
-      GeneralMV::pvaLoc_wcPosition = pvAttribLocation( shaderProgram, "wcPosition" );
-      GeneralMV::pvaLoc_wcNormal = pvAttribLocation( shaderProgram, "wcNormal" );
+      ppuLoc_M4x4_wc_ec = ppUniformLocation( shaderProgram, "M4x4_wc_ec" );
+      ppuLoc_M4x4_ec_lds = ppUniformLocation( shaderProgram, "M4x4_ec_lds" );
+
+      // TODO: (high priority) ** DONE **
+      // get rid of this light source (switching to phong light model)
+
+      pvaLoc_wcPosition = pvAttribLocation( shaderProgram, "wcPosition" );
+      pvaLoc_wcNormal = pvAttribLocation( shaderProgram, "wcNormal" );
+
+      // TODO: (high priority) ** DONE **
+      // get locations of phong lighting model variables
+      /***************** PHONG LIGHTING MODEL VARIABLES *********/
+      ppuLoc_lightPosition = ppUniformLocation( shaderProgram, "p_ecLightPos" );
+      ppuLoc_lightStrength = ppUniformLocation( shaderProgram, "lightStrength" );
+      ppuLoc_actualNumLights = ppUniformLocation( shaderProgram, "actualNumLights" );
+      ppuLoc_globalAmbient = ppUniformLocation( shaderProgram, "globalAmbient" );
+      ppuLoc_ka = ppUniformLocation( shaderProgram, "ka" );
+      ppuLoc_kd = ppUniformLocation( shaderProgram, "kd" );
+      ppuLoc_ks = ppUniformLocation( shaderProgram, "ks" );
+      ppuLoc_m  = ppUniformLocation( shaderProgram, "m"  );
+      /*****************       END PHONG VARS           *********/
     }
 
 } /* end GeneralMV::fetchGLSLVariableLocations() */

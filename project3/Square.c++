@@ -161,7 +161,10 @@ void Square::render()
       color[2] = 1.0f;
     }
 
-  sendLightSource( color );
+  vec4 ka = { 0.15, 0.15, 0.15, 1.0 };
+  vec4 ks = { 0.2, 0.2, 0.2, 1.0 };
+
+  sendPhongLightModel( ka, color, ks, 10 );
 
   glBindVertexArray( vao );
   glDrawArrays( GL_TRIANGLES, 0, SQ_VERTICES );
