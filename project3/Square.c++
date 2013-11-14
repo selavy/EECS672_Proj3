@@ -37,21 +37,21 @@ _color( color )
   _points = new vec3[ SQ_VERTICES ];
   _normals = new vec3[ SQ_VERTICES ];
 
-  /*
   float xmin = corner[0];
   float xmax = corner[0] + width;
   float ymin = corner[1];
   float ymax = corner[1] + thickness;
   float zmin = corner[2];
   float zmax = corner[2] + width;
-  */
 
+  /*
   float xmin = -0.5f;
   float xmax = 0.5f;
   float ymin = -0.5f;
   float ymax = 0.5f;
   float zmin = -0.5f;
   float zmax = 0.5f;
+  */
 
   _limits[0] = xmin;
   _limits[1] = xmax;

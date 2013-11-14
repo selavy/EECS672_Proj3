@@ -186,7 +186,10 @@ void Pawn::render()
       color[2] = 1.0f;
     }
 
-  sendLightSource( color );
+  vec4 ka = { 0.2, 0.2, 0.2, 1.0 };
+  vec4 ks = { 0.5, 0.5, 0.5, 1.0 };
+
+  sendPhongLightModel( ka, color, ks, 20 );
 
   glBindVertexArray( vao );
   glDrawArrays( GL_TRIANGLES, 0, PWN_VERTICES );

@@ -243,7 +243,9 @@ void King::render()
       color[2] = 1.0f;
     }
 
-  sendLightSource( color );
+  vec4 ka = { 0.6, 0.6, 0.6, 1.0 };
+  vec4 ks = { 0.1, 0.1, 0.1, 1.0 };
+  sendPhongLightModel( ka, color, ks, 5 );
 
   glBindVertexArray( vao );
   glDrawArrays( GL_TRIANGLES, 0, KING_VERTICES );

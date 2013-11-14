@@ -42,6 +42,7 @@ using namespace std;
 
 /* static */ vec3 GeneralMV::_up = { 0.0f, 1.0f, 0.0f }; // always up will be the y-axis
 /* static */ vec3 GeneralMV::_center = { 0.0f, 0.0f, 0.0f }; // for now just the origin
+/* static */ float GeneralMV::_zpp = 0.0f;
 
 // TODO: (high priority) ** DONE **
 // Add phong light model variables 
@@ -131,7 +132,10 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
 
   if( key == 'q' )
     {
-      _proj_type = OBLIQUE;
+      // TODO: (high priority)
+      // switch back
+      // _proj_type = OBLIQUE;
+      _proj_type = ORTHOGONAL;
     }
   else if( key == 'o' )
     {
@@ -142,6 +146,7 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
       _proj_type = PERSPECTIVE;
     }
   
+  /*
   if( key == 'w' )
     {
       _eye[2] += MOVSPEED;
@@ -158,62 +163,15 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
     {
       _eye[0] += MOVSPEED;
     }
-  else if( key == 'r' )
-    {
-      _eye[1] += MOVSPEED;
-    }
-  else if( key == 'f' )
-    {
-      _eye[1] -= MOVSPEED;
-    }
-  else if( key == 'o' )
-    {
-_eye[0] = 0.0f;
-_eye[1] = 0.0f;
-_eye[2] = -1.0f * GeneralMV::_r * ZEYEMULTIPLIER;
-    }
-  else if( key == 'i' )
-    {
-      _ecmin[2] += MOVSPEED;
-      _ecmax[2] += MOVSPEED;
-    }
-  else if( key == 'k' )
-    {
-      _ecmin[2] -= MOVSPEED;
-      _ecmax[2] -= MOVSPEED;
-    }
-  else if( key == 'j' )
-    {
-      _ecmin[0] -= MOVSPEED;
-      _ecmax[0] -= MOVSPEED;
-    }
-  else if( key == 'l' )
-    {
-      _ecmin[0] += MOVSPEED;
-      _ecmax[0] += MOVSPEED;
-    }
-  else if( key == 'y' )
-    {
-      _ecmin[1] -= MOVSPEED;
-      _ecmax[1] -= MOVSPEED;
-    }
-  else if( key == 'u' )
-    {
-      _ecmin[1] += MOVSPEED;
-      _ecmax[1] += MOVSPEED;
-    }
-
   else if( key == 'z' )
     {
       // TODO: (med priority)
       // zoom by moving frustum in _perspective
-      _ecmax[2] += MOVSPEED;
     }
-
-  else if( key == 'n' )
+  else if( key == ??spacebar?? )
     {
-      _ecmin[2] -= MOVSPEED;
     }
+  */
 
   printEyeLoc();
   printBox();
@@ -261,6 +219,8 @@ void GeneralMV::calcBoundingSphere()
   // TODO: (lowest priority)
   // get a faster sqrt function
   _r = (tmpmin > tmpmax) ? sqrt( tmpmin ) : sqrt( tmpmax );
+
+  _zpp = -2.8 * _r;
 
   // e = normalize( < 3, 1, 5 > )
 #define _EX ( 0.507093f )
@@ -343,29 +303,27 @@ void GeneralMV::getMatrices( double limits[6] )
 	       _model_view
 	       );
 
-
-
   // TODO: (high priority)
   // Change the projection matrix based upon _proj_type
-  // if( _proj_type == ORTHOGONAL )
-  //  {
-  //Get the orthogonal projection matrix
-  orthogonal(
-  	     _ecmin[0], _ecmax[0], _ecmin[1],
-  	     _ecmax[1], _ecmin[2], _ecmax[2],
-  	     _projection
-  	     );
+  if( _proj_type == ORTHOGONAL )
+    {
+      //Get the orthogonal projection matrix
+      orthogonal(
+		 _ecmin[0], _ecmax[0], _ecmin[1],
+		 _ecmax[1], _ecmin[2], _ecmax[2],
+		 _projection
+		 );
   
-  // }
+    }
   // else if( _proj_type == OBLIQUE )
   //  {
   //     oblique( zpp, xmin, xmax, ymin, ymax, zmin, zmax, dx, dy, dz, m[] ); length(m) == 16
   //  }
-  // else( _proj_type == PERSPECTIVE )
-  //  {
-  //	  perspective( zpp, xmin, xmax, ymin, ymax, zmin, zmax, m[] ); length(m) == 16
-  //  }
-  //
+  else //( _proj_type == PERSPECTIVE )
+    {
+      perspective( _zpp, _ecmin[0], _ecmax[0], _ecmin[1], _ecmax[1], _ecmin[2], _ecmax[2], _projection ); // length(m) == 16
+    }
+  
 
   
   glUniformMatrix4fv( GeneralMV::ppuLoc_M4x4_wc_ec, 1, GL_FALSE, _model_view );
@@ -407,7 +365,7 @@ void GeneralMV::sendPhongLightModel( const vec4& ka, const vec4& kd, const vec4&
   glUniform4fv( ppuLoc_lightPosition, numLights, lightPositionInEC );
   glUniform3fv( ppuLoc_lightStrength, numLights, _lightStrength );
   glUniform1i( ppuLoc_actualNumLights, numLights );
-  glUniform3fv( ppuLoc_globalAmbient, 1, _ambientStrength );
+  glUniform4fv( ppuLoc_globalAmbient, 1, _ambientStrength );
 
   glUniform4fv( ppuLoc_ka, 1, ka );
   glUniform4fv( ppuLoc_kd, 1, kd );

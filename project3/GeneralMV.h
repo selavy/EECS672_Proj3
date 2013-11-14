@@ -102,6 +102,7 @@ class GeneralMV : public ModelView
 	static vec3 _ecmin;        //!> The model's bounding box mins in eye coordinates
 	static vec3 _ecmax;        //!> The model's bounding box maxs in eye coordinates
 	static float _r; //!> Bounding sphere radius
+	static float _zpp; //!> projection plane for perspective projection
 
 	static PROJECTION_TYPE _proj_type;
 	mat4 _model_view;   //!> The matrix to convert from eye coordinates to LDS
