@@ -16,6 +16,8 @@
 
 #define numLights 3
 
+#define RGB(x) ( (x) / 255.0 )
+
 typedef float mat4[16]; // specify in row major, and will always transpose with openGL
 typedef float vec3[3];
 typedef float vec4[4];

@@ -1,13 +1,9 @@
 // Pawn.c++
 
 #include "Pawn.h"
-#include "ShaderIF.h"
-#include "Controller.h"
 
 #include <iostream>
 using namespace std;
-
-#define RGB(x) ( (x) / 255.0 )
 
 Pawn::Pawn( 
 	       int color,
@@ -20,8 +16,6 @@ Pawn::Pawn(
   _points = new vec3[ PWN_VERTICES ];
   _normals = new vec3[ PWN_VERTICES ];
 
-
-
 #define BWIDTH 5.0f
 #define MWIDTH 3.0f
 #define TWIDTH 4.0f
@@ -30,7 +24,7 @@ Pawn::Pawn(
 #define BHEIGHT 1.8f
 #define PHEIGHT 1.0f
 #define MHEIGHT 2.5f
-#define THEIGHT 1.5f
+#define THEIGHT 1.0f
 
 #define STARTP (BHEIGHT)
 #define STARTM (BHEIGHT + PHEIGHT)
@@ -81,6 +75,7 @@ Pawn::Pawn(
     */
 
     // top
+    /*
     { corner[0] + TLEFT, corner[1] + STARTT, corner[2] + TLEFT },
     { corner[0] + TLEFT, corner[1] + ENDT,   corner[2] + TLEFT },
     { corner[0] + TRGHT, corner[1] + ENDT,   corner[2] + TLEFT },
@@ -89,13 +84,26 @@ Pawn::Pawn(
     { corner[0] + TLEFT, corner[1] + ENDT,   corner[2] + TRGHT },
     { corner[0] + TRGHT, corner[1] + ENDT,   corner[2] + TRGHT },
     { corner[0] + TRGHT, corner[1] + STARTT, corner[2] + TRGHT },
+    */
 
   };
+  vec3 cylindercorner;
+  cylindercorner[0] = corner[0] + MWIDTH / 1.2f;
+  cylindercorner[2] = corner[2] + MWIDTH / 1.2f;
+  cylindercorner[1] = corner[1] + MHEIGHT;
 
+  /*
   corner[0] += MWIDTH / 1.2f;
   corner[2] += MWIDTH / 1.2f;
   corner[1] += MHEIGHT;
-  _midsection = new Cylinder( corner, 1.5, 2.5, color );
+  */
+  _midsection = new Cylinder( cylindercorner, 1.5, 2.5, color );
+
+  vec3 topcorner;
+  topcorner[0] = corner[0] + MWIDTH / 1.2f;
+  topcorner[2] = corner[2] + MWIDTH / 1.2f;
+  topcorner[1] = corner[1] + STARTT + THEIGHT;
+  _top = new Sphere( topcorner, 2.2, color ); 
 
   memcpy( _vertices, tmp, PWN_CORNERS * sizeof( vec3 ) );
 
@@ -115,6 +123,7 @@ Pawn::~Pawn()
   glDeleteVertexArrays( 1, &vao );
 
   delete _midsection;
+  delete _top;
 
   delete [] _points;
   delete [] _normals;
@@ -140,8 +149,6 @@ void Pawn::defineModel()
       quad( i+6, i+5, i+1, i+2, index );
       quad( i+4, i+5, i+6, i+7, index );
     }
-
-  cout << "index = " << index << endl;
 
   glGenVertexArrays( 1, &vao );
   glBindVertexArray( vao );
@@ -204,6 +211,7 @@ void Pawn::render()
   sendPhongLightModel( ka, kd, ks, 30 );
 
   _midsection->render();
+  _top->render();
 
   glBindVertexArray( vao );
   glDrawArrays( GL_TRIANGLES, 0, PWN_VERTICES );

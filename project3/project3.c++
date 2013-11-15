@@ -4,11 +4,9 @@
 #include <GL/freeglut.h>
 
 #include "Controller.h"
-#include "Square.h"
 #include "Board.h"
 #include "King.h"
 #include "Pawn.h"
-#include "Cylinder.h"
 
 #define WHITE 1
 #define BLACK 0
@@ -26,15 +24,6 @@ int main(int argc, char* argv[])
 	Controller c("Your move.", GLUT_DEPTH | GLUT_DOUBLE);
 
 	// create your scene, adding things to the Controller....
-	/*
-	vec3 location = { 0.0f, 0.0f, 0.0f };
-	vec3 location2 = { 5.0f, 0.0, 0.0f };
-	
-
-	c.addModel( new Square( TEST, location, 1.0f, 1.0f ) );
-	c.addModel( new Square( BLACK, location2, 1.0f, 1.0f ) );
-	*/
-
 	vec3 location = { -50.0f, -0.5f, 0.0f };
 	vec3 whitepawnlocation = { -17.5f, 0.0f, 62.5f };
 	vec3 blackpawnlocation = { -7.5f, 0.0f, 12.5f };
@@ -47,7 +36,6 @@ int main(int argc, char* argv[])
 	c.addModel( new King( WHITE, whitekinglocation ) );
 	c.addModel( new King( BLACK, blackkinglocation ) );
 
-	//c.addModel( new Cylinder( whitepawnlocation, 3.0f, 5.0f, BLACK ) );
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	// Off to the glut event handling loop:

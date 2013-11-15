@@ -5,9 +5,10 @@
 
 #include "GeneralMV.h"
 #include "Cylinder.h"
+#include "Sphere.h"
 
-#define PWN_CORNERS 24
-#define PWN_FACES 18
+#define PWN_CORNERS 16
+#define PWN_FACES 12
 #define PWN_VERTICES (6 * PWN_FACES)
 
 #define _V( x ) _vertices[ (x) ]
@@ -30,6 +31,7 @@ private:
 	double _limits[6];
 
 	Cylinder * _midsection;
+	Sphere * _top;
 	int _color;
 };
 

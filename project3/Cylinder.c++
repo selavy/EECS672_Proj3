@@ -63,8 +63,6 @@ void Cylinder::defineCylinder()
       normals[j+1][0] = dx; normals[j+1][1] = 0.0; normals[j+1][2] = dz;
       coords[j+1][0] = zb + r*dx; coords[j+1][1] = z2; coords[j+1][2] = vb + r*dz;
       theta += dTheta;
-
-      cout << "(" << coords[j][0] << ", " << coords[j][1] << ", " << coords[j][2] << ")" << endl;
     }
 
   glGenVertexArrays( 1, &vao );

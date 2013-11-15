@@ -4,7 +4,7 @@
 
 using namespace std;
 
-#define __DEBUG__
+//#define __DEBUG__
 
 #define SQRD( x ) ( x * x )
 
@@ -435,6 +435,7 @@ void GeneralMV::tri( const vec3& veca,
 		     int& Index           //!> The index in _points and _normals at which to start
 		     )
 {
+  cout << "(tri) Index = " << Index << endl;
   cryph::AffVector a( veca );
   cryph::AffVector b( vecb );
   cryph::AffVector c( vecc );
@@ -442,10 +443,13 @@ void GeneralMV::tri( const vec3& veca,
   /* based on the example function quad() from Interactive Computer Graphics by E. Angel, p. 627 */
   cryph::AffVector normal = cryph::AffVector::cross( b - a, c - b );
   normal.normalize();
-
+  cout << "1";
   normal.vComponents( _normals[Index] ); a.vComponents( _points[Index] ); Index++;
+  cout << "2";
   normal.vComponents( _normals[Index] ); b.vComponents( _points[Index] ); Index++;
+  cout << "3" << endl;
   normal.vComponents( _normals[Index] ); c.vComponents( _points[Index] ); Index++;
+  cout << "4" << endl;
 } /* end GeneralMV::tri() */
 
 void GeneralMV::quad( 
@@ -456,7 +460,6 @@ void GeneralMV::quad(
 		     int& Index          //!> The index in _points and _normals at which to start
 		      )
 {
-  //cryph::AffVector u = cryph::AffVector( _vertices[b] ) - cryph::AffVector( _vertices[a] );
   cryph::AffVector u = cryph::AffVector( _vertices[a] ) - cryph::AffVector( _vertices[b] );
   cryph::AffVector v = cryph::AffVector( _vertices[c] ) - cryph::AffVector( _vertices[b] );
 

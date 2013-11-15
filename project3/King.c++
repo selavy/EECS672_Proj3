@@ -1,13 +1,10 @@
 // King.c++
 
 #include "King.h"
-#include "ShaderIF.h"
-#include "Controller.h"
 
 #include <iostream>
 using namespace std;
 
-#define RGB(x) ( (x) / 255.0 )
 
 King::King( 
 	       int color,

@@ -1,27 +1,8 @@
 // Square.c++
-
-#ifndef WHITE
-#define WHITE 1
-#endif
-
-#ifndef BLACK
-#define BLACK 0
-#endif
-
-#ifndef BORDER
-#define BORDER 2
-#endif
-
-#ifndef TEST
-#define TEST 3
-#endif
-
 #include "Square.h"
 
 #include <iostream>
 using namespace std;
-
-#define RGB(x) ( (x) / 255.0 )
 
 Square::Square( 
 	       int color,
