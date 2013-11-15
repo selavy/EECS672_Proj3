@@ -10,7 +10,7 @@ using namespace std;
 
 #define ZEYEMULTIPLIER ( 5.0f )
 #define _MULTIPLIER ( 1.8f )
-#define MOVSPEED ( 0.1f )
+#define MOVESPEED ( 0.1f )
 
 /* static */ ShaderIF * GeneralMV::shaderIF = NULL;
 /* static */ int GeneralMV::numInstances = 0;
@@ -44,6 +44,15 @@ using namespace std;
 /* static */ vec3 GeneralMV::_center = { 0.0f, 0.0f, 0.0f }; // for now just the origin
 /* static */ float GeneralMV::_zpp = 0.0f;
 
+// e = normalize( < 3, 1, 5 > )
+/* static */ cryph::AffVector GeneralMV::_E = cryph::AffVector( 3, 1, 5 );
+/* static */ float GeneralMV::_EX = 0.507093f;
+/* static */ float GeneralMV::_EY = 0.169030f;
+/* static */ float GeneralMV::_EZ = 0.845154f;
+/* static */ float GeneralMV::_F = 3.0f;
+/* static */ float GeneralMV::_D = 0.0f;
+/* static */ float GeneralMV::_frustum = -2.2f;
+
 // TODO: (high priority) ** DONE **
 // Add phong light model variables 
 // TODO: (med priority)
@@ -68,9 +77,9 @@ using namespace std;
 /* static */ vec3 GeneralMV::_ecmin = { -1.0, -1.0f, -1.0f };
 /* static */ vec3 GeneralMV::_ecmax = {  1.0f, 1.0f,  1.0f };
 
-// TODO: (med priority)
-// Change this to perspective (high priority)
-/* static */ GeneralMV::PROJECTION_TYPE GeneralMV::_proj_type = ORTHOGONAL;
+// TODO: (med priority) ** DONE **
+// Change this to perspective
+/* static */ GeneralMV::PROJECTION_TYPE GeneralMV::_proj_type = PERSPECTIVE;
 /* static */ float GeneralMV::_r = 0.0f;
 
 
@@ -146,32 +155,42 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
       _proj_type = PERSPECTIVE;
     }
   
-  /*
   if( key == 'w' )
     {
-      _eye[2] += MOVSPEED;
+      cryph::AffVector moveUp( 0.0f, 0.0f, MOVESPEED );
+      _E += moveUp;
     }
   else if( key == 's' )
     {
-      _eye[2] -= MOVSPEED;
+      cryph::AffVector moveDown( 0.0f, 0.0f, MOVESPEED );
+      _E -= moveDown;
     }
   else if( key == 'a' )
     {
-      _eye[0] -= MOVSPEED;
+      cryph::AffVector moveLeft( MOVESPEED, 0.0f, 0.0f );
+      _E -= moveLeft;
     }
   else if( key == 'd' )
     {
-      _eye[0] += MOVSPEED;
+      cryph::AffVector moveRight( MOVESPEED, 0.0f, 0.0f );
+      _E += moveRight;
     }
   else if( key == 'z' )
     {
       // TODO: (med priority)
       // zoom by moving frustum in _perspective
+      if( _frustum > -3.5f )
+	_frustum -= MOVESPEED;
+      else
+	_frustum = -3.5f;
     }
-  else if( key == ??spacebar?? )
+  else if( key == ' ' )
     {
+      if( _frustum < -1.0f )
+	_frustum += MOVESPEED;
+      else
+	_frustum = -1.0f;
     }
-  */
 
   printEyeLoc();
   printBox();
@@ -220,14 +239,14 @@ void GeneralMV::calcBoundingSphere()
   // get a faster sqrt function
   _r = (tmpmin > tmpmax) ? sqrt( tmpmin ) : sqrt( tmpmax );
 
-  _zpp = -2.8 * _r;
+  _zpp = _frustum * _r;
+  _D = _F * _r;
 
-  // e = normalize( < 3, 1, 5 > )
-#define _EX ( 0.507093f )
-#define _EY ( 0.169030f )
-#define _EZ ( 0.845154f )
-#define _F ( 3.0f )
-#define _D ( _F * _r )
+  float tmpE[3];
+
+  _E.normalize();
+  _E.vComponents( tmpE );
+  _EX = tmpE[0]; _EY = tmpE[1]; _EZ = tmpE[2];
 
   _eye[0] = _center[0] + _D * _EX;
   _eye[1] = _center[1] + _D * _EY;

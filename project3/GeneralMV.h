@@ -104,6 +104,13 @@ class GeneralMV : public ModelView
 	static float _r; //!> Bounding sphere radius
 	static float _zpp; //!> projection plane for perspective projection
 
+	static cryph::AffVector _E;
+	static float _EX;
+	static float _EY;
+	static float _EZ;
+	static float _D;
+	static float _F;
+	static float _frustum;
 	static PROJECTION_TYPE _proj_type;
 	mat4 _model_view;   //!> The matrix to convert from eye coordinates to LDS
 	mat4 _projection;   //!> The orthogonal projection matrix

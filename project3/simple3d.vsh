@@ -24,13 +24,10 @@ uniform vec4 p_ecLightPos[MAX_NUM_LIGHTS];
 uniform vec3 lightStrength[MAX_NUM_LIGHTS];
 uniform int actualNumLights = 1;
 uniform vec4 globalAmbient = vec4( 1.0, 1.0, 1.0, 1.0 ); // default: white
-uniform vec4 ka; // = // ambient color
-//	vec4( 0.0, 0.0, 0.8, 1.0 ); // default: dark blue  
-uniform vec4 kd; //= // "kd" - diffuse reflectivity;
-//	vec4(0.8, 0.0, 0.0, 1.0); // default: darkish red
-uniform vec4 ks; //= // incident light
-//	vec4( 0.0, 0.8, 0.0, 1.0 ); // default: dark green
-uniform float m; //= 5; // specular coefficient
+uniform vec4 ka; // ambient color
+uniform vec4 kd; // "kd" - diffuse reflectivity;
+uniform vec4 ks; // incident light
+uniform float m; // specular coefficient
 
 // END PHONG LIGHTING MODEL //
 
@@ -53,12 +50,11 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 {
 	vec4 I_q = { 0.0, 0.0, 0.0, 0.0 };
 	vec4 ambientFactor;
-	for( int i = 0; i < 3; ++i )
-	{
-		ambientFactor[i] = ka[i] * globalAmbient[i];
-	}
+
+	ambientFactor.xyz = ka.xyz * globalAmbient.xyz;
+
 	I_q = ambientFactor;
-	I_q[3] = ks[3];
+	I_q.w = ks.w;
  
 	vec3 accumulator = { 0.0, 0.0, 0.0 };
 	vec3 ec_v = { 0.0, 0.0, 1.0 };
@@ -86,7 +82,7 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 	// if we are viewing this point "from behind", we need to negate the incoming
 	// normal vector since our lighting model expressions implicitly assume the normal
 	// vector points toward the same side of the triangle that the eye is on.
-	if( ec_v[2] < ec_Q[2] )
+	if( ec_v.z < ec_Q.z )
 	    {
 		ec_Q = -1.0f * ec_Q;
 	    }
@@ -94,7 +90,7 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 	for( int i = 0; i < actualNumLights; ++i )
 	     {
 		// if light is behind this object, skip this light source
-		if( p_ecLightPos[i][2] < ec_Q[2] )
+		if( p_ecLightPos[i].z < ec_Q.z )
 		    {
 			continue;
 		    }
@@ -105,28 +101,22 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 
 			// compute l_i
 			vec3 ec_li;
-			ec_li[0] = p_ecLightPos[i][0];
-			ec_li[1] = p_ecLightPos[i][1];
-			ec_li[2] = p_ecLightPos[i][2];
+			ec_li.xyz = p_ecLightPos[i].xyz;
 
-			if( p_ecLightPos[i][3] == 1.0 )
+			if( p_ecLightPos[i].w != 0.0 )
 			{
 				ec_li = ec_li - ec_Q;
 			}
 
 			ec_li = normalize( ec_li );
 
-
-			float diffuse = dot( ec_nHat, ec_li );
+			float diffuse = max( dot( ec_nHat, ec_li ), 0.0 );
 			
-			for( int t = 0; t < 2; ++t )
-			{
-				tmpacc[t] = kd[t] * diffuse;
-			}
+			tmpacc.xyz = kd.xyz * diffuse;
 
 		        // 2. if viewer on appropriate side of normal vector,
 		        // compute and accumulate specular contribution
-			if( p_ecLightPos[i][2] < ec_v[2] )
+			if( dot( ec_li, ec_nHat ) > 0.0 )
 			{
 				// compute r_i
 				// r_i = 2 * (li dot nhat)*nhat - li
@@ -134,27 +124,20 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 			 	r_i = r_i * 2;
 				r_i = r_i * dot( ec_li, ec_nHat );
 				r_i = r_i - ec_li;
+				
+				float specular = pow( max( dot( r_i, ec_v ), 0.0 ), m );
 
-				float specular = dot( r_i, ec_v );
-				specular = pow( specular, m );
-
-				for( int t = 0; t < 2; ++t )
-				{
-					tmpacc[t] += ks[t] * specular;
-				}
+				tmpacc.xyz += ks.xyz * specular;
 			}
 
 			for( int t = 0; t < 2; ++t )
 			{
-				accumulator[i] += tmpacc[t] * lightStrength[i][t];
+				accumulator[t] += tmpacc[t] * lightStrength[i][t];
 			}
 		    }
 	      }
 
-	      for( int i = 0; i < 2; ++i )
-	      {
-		I_q[i] += accumulator[i];
-	      }
+	      I_q.xyz += accumulator.xyz;
 
 	      return I_q;	      
 }
