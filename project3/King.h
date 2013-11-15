@@ -14,7 +14,7 @@ class King : public GeneralMV
 {
 public:
   King( int color, vec3 corner );
-	virtual ~King();
+  virtual ~King();
 
 	// xyzLimits: {wcXmin, wcXmax, wcYmin, wcYmax, wcZmin, wcZmax}
 	void getWCBoundingBox(double* xyzLimitsF) const;

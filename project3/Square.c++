@@ -127,44 +127,45 @@ void Square::render()
   
   getMatrices( _limits );
 
-  vec4 color;
-  color[3] = 1.0f;
+  vec4 kd;
+  kd[3] = 1.0f;
 
   if( _color == WHITE )
     {
-      color[0] = RGB( 245.0f );
-      color[1] = RGB( 255.0f );
-      color[2] = RGB( 250.0f );
+      kd[0] = RGB( 245.0f );
+      kd[1] = RGB( 255.0f );
+      kd[2] = RGB( 250.0f );
     }
   else if( _color == BLACK )
     {
-      color[0] = RGB( 100 );
-      color[1] = RGB( 69 );
-      color[2] = RGB( 19 );
+      kd[0] = RGB( 100 );
+      kd[1] = RGB( 69 );
+      kd[2] = RGB( 19 );
     }
   else if( _color == BORDER )
     {
-      color[0] = RGB( 139.0f );
-      color[1] = RGB( 69.0f );
-      color[2] = RGB( 19.0f );
+      kd[0] = RGB( 139.0f );
+      kd[1] = RGB( 69.0f );
+      kd[2] = RGB( 19.0f );
     }
   else if( _color == TEST )
     {
-      color[0] = 1.0f;
-      color[1] = 0.0f;
-      color[2] = 0.0f;
+      kd[0] = 1.0f;
+      kd[1] = 0.0f;
+      kd[2] = 0.0f;
     }
   else
     {
-      color[0] = 0.0f;
-      color[1] = 0.0f;
-      color[2] = 1.0f;
+      kd[0] = 0.0f;
+      kd[1] = 0.0f;
+      kd[2] = 1.0f;
     }
 
-  vec4 ka = { 0.15, 0.15, 0.15, 1.0 };
-  vec4 ks = { 0.2, 0.2, 0.2, 1.0 };
+  vec4 ks = { 0.3, 0.3, 0.3, 1.0 };
+  vec4 ka;
+  memcpy( ka, kd, sizeof( vec4 ) );
 
-  sendPhongLightModel( ka, color, ks, 10 );
+  sendPhongLightModel( ka, kd, ks, 10 );
 
   glBindVertexArray( vao );
   glDrawArrays( GL_TRIANGLES, 0, SQ_VERTICES );

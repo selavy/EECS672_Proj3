@@ -68,6 +68,7 @@ Pawn::Pawn(
     { corner[0] + PRGHTT, corner[1] +  STARTM, corner[2] + PRGHTT },
     { corner[0] + PRGHTB, corner[1] +  STARTP, corner[2] + PRGHTB },
 
+    /*
     // mid section
     { corner[0] + MLEFT, corner[1] + STARTM, corner[2] + MLEFT },
     { corner[0] + MLEFT, corner[1] + STARTT, corner[2] + MLEFT },
@@ -77,6 +78,7 @@ Pawn::Pawn(
     { corner[0] + MLEFT, corner[1] + STARTT, corner[2] + MRGHT },
     { corner[0] + MRGHT, corner[1] + STARTT, corner[2] + MRGHT },
     { corner[0] + MRGHT, corner[1] + STARTM, corner[2] + MRGHT },
+    */
 
     // top
     { corner[0] + TLEFT, corner[1] + STARTT, corner[2] + TLEFT },
@@ -89,6 +91,11 @@ Pawn::Pawn(
     { corner[0] + TRGHT, corner[1] + STARTT, corner[2] + TRGHT },
 
   };
+
+  corner[0] += MWIDTH / 1.2f;
+  corner[2] += MWIDTH / 1.2f;
+  corner[1] += MHEIGHT;
+  _midsection = new Cylinder( corner, 1.5, 2.5, color );
 
   memcpy( _vertices, tmp, PWN_CORNERS * sizeof( vec3 ) );
 
@@ -107,6 +114,8 @@ Pawn::~Pawn()
   glDeleteBuffers( 2, &vbo[0] );
   glDeleteVertexArrays( 1, &vao );
 
+  delete _midsection;
+
   delete [] _points;
   delete [] _normals;
   delete [] _vertices;
@@ -122,7 +131,7 @@ void Pawn::defineModel()
 {
   int index = 0;
 
-  for( int i = 0; i < 25; i += 8 )
+  for( int i = 0; i <= PWN_FACES; i += 8 )
     {
       quad( i+1, i, i+3, i+2, index );
       quad( i+3, i, i+4, i+7, index );
@@ -131,6 +140,8 @@ void Pawn::defineModel()
       quad( i+6, i+5, i+1, i+2, index );
       quad( i+4, i+5, i+6, i+7, index );
     }
+
+  cout << "index = " << index << endl;
 
   glGenVertexArrays( 1, &vao );
   glBindVertexArray( vao );
@@ -156,8 +167,8 @@ void Pawn::render()
   
   getMatrices( _limits );
 
-  vec4 color;
-  color[3] = 1.0f;
+  vec4 kd;
+  kd[3] = 1.0f;
 
 #ifndef BLACK
 #define BLACK 0
@@ -169,27 +180,30 @@ void Pawn::render()
 
   if( _color == BLACK )
     {
-      color[0] = RGB( 49.0f );
-      color[1] = RGB( 79.0f );
-      color[2] = RGB( 79.0f );
+      kd[0] = RGB( 49.0f );
+      kd[1] = RGB( 79.0f );
+      kd[2] = RGB( 79.0f );
     }
   else if( _color == WHITE )
     {
-      color[0] = RGB( 245.0f );
-      color[1] = RGB( 255.0f );
-      color[2] = RGB( 250.0f );
+      kd[0] = RGB( 245.0f );
+      kd[1] = RGB( 255.0f );
+      kd[2] = RGB( 250.0f );
     }
   else
     {
-      color[0] = 0.0f;
-      color[1] = 0.0f;
-      color[2] = 1.0f;
+      kd[0] = 0.0f;
+      kd[1] = 0.0f;
+      kd[2] = 1.0f;
     }
 
-  vec4 ka = { 0.2, 0.2, 0.2, 1.0 };
   vec4 ks = { 0.5, 0.5, 0.5, 1.0 };
+  vec4 ka;
+  memcpy( ka, kd, sizeof( vec4 ) );
 
-  sendPhongLightModel( ka, color, ks, 20 );
+  sendPhongLightModel( ka, kd, ks, 30 );
+
+  _midsection->render();
 
   glBindVertexArray( vao );
   glDrawArrays( GL_TRIANGLES, 0, PWN_VERTICES );

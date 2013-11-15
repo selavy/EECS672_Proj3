@@ -213,8 +213,8 @@ void King::render()
   
   getMatrices( _limits );
 
-  vec4 color;
-  color[3] = 1.0f;
+  vec4 kd;
+  kd[3] = 1.0f;
 
 #ifndef BLACK
 #define BLACK 0
@@ -226,26 +226,28 @@ void King::render()
 
   if( _color == BLACK )
     {
-      color[0] = RGB( 49.0f );
-      color[1] = RGB( 79.0f );
-      color[2] = RGB( 79.0f );
+      kd[0] = RGB( 49.0f );
+      kd[1] = RGB( 79.0f );
+      kd[2] = RGB( 79.0f );
     }
   else if( _color == WHITE )
     {
-      color[0] = RGB( 245.0f );
-      color[1] = RGB( 255.0f );
-      color[2] = RGB( 250.0f );
+      kd[0] = RGB( 245.0f );
+      kd[1] = RGB( 255.0f );
+      kd[2] = RGB( 250.0f );
     }
   else
     {
-      color[0] = 0.0f;
-      color[1] = 0.0f;
-      color[2] = 1.0f;
+      kd[0] = 0.0f;
+      kd[1] = 0.0f;
+      kd[2] = 1.0f;
     }
 
-  vec4 ka = { 0.6, 0.6, 0.6, 1.0 };
+
   vec4 ks = { 0.1, 0.1, 0.1, 1.0 };
-  sendPhongLightModel( ka, color, ks, 5 );
+  vec4 ka;
+  memcpy( ka, kd, sizeof( vec4 ) );
+  sendPhongLightModel( ka, kd, ks, 30 );
 
   glBindVertexArray( vao );
   glDrawArrays( GL_TRIANGLES, 0, KING_VERTICES );

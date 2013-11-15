@@ -11,6 +11,8 @@ using namespace std;
 #define ZEYEMULTIPLIER ( 5.0f )
 #define _MULTIPLIER ( 1.8f )
 #define MOVESPEED ( 0.1f )
+#define MAXZOOM ( -4.0f )
+#define MINZOOM ( -1.0f )
 
 /* static */ ShaderIF * GeneralMV::shaderIF = NULL;
 /* static */ int GeneralMV::numInstances = 0;
@@ -38,20 +40,19 @@ using namespace std;
 /* static */ GLint GeneralMV::ppuLoc_m = -1;
 /*********************     END PHONG LOC VARS    *************/
 
-/* static */ vec3 GeneralMV::_eye = { 0.0f, 0.0f, 1.0f };
-
-/* static */ vec3 GeneralMV::_up = { 0.0f, 1.0f, 0.0f }; // always up will be the y-axis
-/* static */ vec3 GeneralMV::_center = { 0.0f, 0.0f, 0.0f }; // for now just the origin
-/* static */ float GeneralMV::_zpp = 0.0f;
+/* static */ vec3 GeneralMV::_eye;                           //!> location of eye
+/* static */ vec3 GeneralMV::_up = { 0.0f, 1.0f, 0.0f };     //!> always up will be the y-axis
+/* static */ vec3 GeneralMV::_center = { 0.0f, 0.0f, 0.0f }; //!> for now just the origin
+/* static */ float GeneralMV::_zpp;                          //!> location of projection plane for perspective projection
 
 // e = normalize( < 3, 1, 5 > )
-/* static */ cryph::AffVector GeneralMV::_E = cryph::AffVector( 3, 1, 5 );
+/* static */ cryph::AffVector GeneralMV::_E = cryph::AffVector( 0.867535f, 0.497376f, 0.00139473 );
 /* static */ float GeneralMV::_EX = 0.507093f;
 /* static */ float GeneralMV::_EY = 0.169030f;
 /* static */ float GeneralMV::_EZ = 0.845154f;
 /* static */ float GeneralMV::_F = 3.0f;
 /* static */ float GeneralMV::_D = 0.0f;
-/* static */ float GeneralMV::_frustum = -2.2f;
+/* static */ float GeneralMV::_frustum = -3.0f;
 
 // TODO: (high priority) ** DONE **
 // Add phong light model variables 
@@ -59,16 +60,16 @@ using namespace std;
 // select good locations and strengths
 /*********************** PHONG LIGHTING MODEL VARIABLES *******/
 /* static */ vec4 GeneralMV::_lightPosition[numLights] = {
-  { -1.0, 0.0, 1.0, 0.0 }, // source 0: directional
+  { -1.0, 0.0, 0.5, 0.0 }, // source 0: directional
   {  0.0, 1.0, 1.0, 0.0 }, // source 1: directional
-  {  0.0, 0.0, 5.0, 1.0 }  // source 2: positional
+  {  0.0, 0.0, 6.0, 1.0 }  // source 2: positional
 };
 /* static */ float GeneralMV::_lightStrength[3 * numLights] = {
   1.0, 1.0, 1.0, // source 0: 100% strength white
   0.4, 0.4, 0.4, // source 1:  40% strength white
   0.8, 0.8, 0.0  // source 2:  80% strength yellow
 };
-/* static */ vec4 GeneralMV::_ambientStrength = { 0.15, 0.15, 0.15, 1.0 }; // assumed ambient light
+/* static */ vec4 GeneralMV::_ambientStrength = { 0.20, 0.20, 0.20, 1.0 }; // assumed ambient light
 /********************** END PHONG VARS ************************/
 
 // TODO: (high priority) ** DONE **
@@ -157,12 +158,12 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
   
   if( key == 'w' )
     {
-      cryph::AffVector moveUp( 0.0f, 0.0f, MOVESPEED );
+      cryph::AffVector moveUp( 0.0f, MOVESPEED, 0.0f );
       _E += moveUp;
     }
   else if( key == 's' )
     {
-      cryph::AffVector moveDown( 0.0f, 0.0f, MOVESPEED );
+      cryph::AffVector moveDown( 0.0f, MOVESPEED, 0.0f );
       _E -= moveDown;
     }
   else if( key == 'a' )
@@ -179,17 +180,17 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
     {
       // TODO: (med priority)
       // zoom by moving frustum in _perspective
-      if( _frustum > -3.5f )
+      if( _frustum > MAXZOOM )
 	_frustum -= MOVESPEED;
       else
-	_frustum = -3.5f;
+	_frustum = MAXZOOM;
     }
   else if( key == ' ' )
     {
-      if( _frustum < -1.0f )
+      if( _frustum < MINZOOM )
 	_frustum += MOVESPEED;
       else
-	_frustum = -1.0f;
+	_frustum = MINZOOM;
     }
 
   printEyeLoc();
@@ -247,6 +248,10 @@ void GeneralMV::calcBoundingSphere()
   _E.normalize();
   _E.vComponents( tmpE );
   _EX = tmpE[0]; _EY = tmpE[1]; _EZ = tmpE[2];
+  
+#ifdef __DEBUG__
+  cout << "E = (" << _EX << ", " << _EY << ", " << _EZ << ")" << endl;
+#endif
 
   _eye[0] = _center[0] + _D * _EX;
   _eye[1] = _center[1] + _D * _EY;

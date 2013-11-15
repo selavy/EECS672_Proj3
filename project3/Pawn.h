@@ -4,10 +4,11 @@
 #define PAWN_H
 
 #include "GeneralMV.h"
+#include "Cylinder.h"
 
-#define PWN_VERTICES 144
-#define PWN_CORNERS 32
-#define PWN_FACES 24
+#define PWN_CORNERS 24
+#define PWN_FACES 18
+#define PWN_VERTICES (6 * PWN_FACES)
 
 #define _V( x ) _vertices[ (x) ]
 
@@ -28,8 +29,8 @@ private:
 	
 	double _limits[6];
 
+	Cylinder * _midsection;
 	int _color;
-
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include "Board.h"
 #include "King.h"
 #include "Pawn.h"
+#include "Cylinder.h"
 
 #define WHITE 1
 #define BLACK 0
@@ -46,6 +47,7 @@ int main(int argc, char* argv[])
 	c.addModel( new King( WHITE, whitekinglocation ) );
 	c.addModel( new King( BLACK, blackkinglocation ) );
 
+	//c.addModel( new Cylinder( whitepawnlocation, 3.0f, 5.0f, BLACK ) );
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 
 	// Off to the glut event handling loop:

@@ -49,9 +49,7 @@ out vec4 colorToFS;
 vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 {
 	vec4 I_q = { 0.0, 0.0, 0.0, 0.0 };
-	vec4 ambientFactor;
-
-	ambientFactor.xyz = ka.xyz * globalAmbient.xyz;
+	vec4 ambientFactor = ka * globalAmbient;
 
 	I_q = ambientFactor;
 	I_q.w = ks.w;
@@ -59,12 +57,14 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 	vec3 accumulator = { 0.0, 0.0, 0.0 };
 	vec3 ec_v = { 0.0, 0.0, 1.0 };
 
+//---------------------------- CREATE V_hat ------------------------------------//
+
 	// Create a unit vector towards the viewer (method depends on type of projection)
 	// if projection type == orthogonal, v = (0, 0, 1)
 	if( M4x4_ec_lds[3][3] != 1.0f )
 	    {
 		// perspective
-		ec_v = -1.0f * normalize( ec_Q );
+		ec_v = -normalize( ec_Q );
 		
 	    }
 	else if( M4x4_ec_lds[1][0] != 0.0f && M4x4_ec_lds[2][0] != 0.0f )
@@ -78,6 +78,8 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 		// orthogonal
 		// ec_v = { 0.0, 0.0, 1.0 };
 	    }
+
+//--------------------------- END CREATE V_hat ---------------------------------//
 
 	// if we are viewing this point "from behind", we need to negate the incoming
 	// normal vector since our lighting model expressions implicitly assume the normal
@@ -99,7 +101,8 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 		        // 1. compute and accumulate diffuse contribution
 			vec3 tmpacc = { 0.0f, 0.0f, 0.0f };
 
-			// compute l_i
+//--------------------------- CREATE L_hat -------------------------------------//
+
 			vec3 ec_li;
 			ec_li.xyz = p_ecLightPos[i].xyz;
 
@@ -109,6 +112,8 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 			}
 
 			ec_li = normalize( ec_li );
+
+//---------------------------- END CREATE L_hat --------------------------------//
 
 			float diffuse = max( dot( ec_nHat, ec_li ), 0.0 );
 			
