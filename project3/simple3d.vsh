@@ -49,15 +49,12 @@ out vec4 colorToFS;
 vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 {
 	vec4 I_q = { 0.0, 0.0, 0.0, 0.0 };
-	vec4 ambientFactor = ka * globalAmbient;
 
-	I_q = ambientFactor;
+	// ambientFactor;
+	I_q = ka * globalAmbient;
 	I_q.w = ks.w;
  
-	vec3 accumulator = { 0.0, 0.0, 0.0 };
 	vec3 ec_v = { 0.0, 0.0, 1.0 };
-
-//---------------------------- CREATE V_hat ------------------------------------//
 
 	// Create a unit vector towards the viewer (method depends on type of projection)
 	// if projection type == orthogonal, v = (0, 0, 1)
@@ -79,8 +76,6 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 		// ec_v = { 0.0, 0.0, 1.0 };
 	    }
 
-//--------------------------- END CREATE V_hat ---------------------------------//
-
 	// if we are viewing this point "from behind", we need to negate the incoming
 	// normal vector since our lighting model expressions implicitly assume the normal
 	// vector points toward the same side of the triangle that the eye is on.
@@ -91,18 +86,9 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 
 	for( int i = 0; i < actualNumLights; ++i )
 	     {
-		// if light is behind this object, skip this light source
-		if( p_ecLightPos[i].z < ec_Q.z )
-		    {
-			continue;
-		    }
-		else
-	       	    {
-		        // 1. compute and accumulate diffuse contribution
 			vec3 tmpacc = { 0.0f, 0.0f, 0.0f };
 
-//--------------------------- CREATE L_hat -------------------------------------//
-
+			// create vector to light source
 			vec3 ec_li;
 			ec_li.xyz = p_ecLightPos[i].xyz;
 
@@ -113,38 +99,31 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 
 			ec_li = normalize( ec_li );
 
-//---------------------------- END CREATE L_hat --------------------------------//
-
-			float diffuse = max( dot( ec_nHat, ec_li ), 0.0 );
+			// if light is behind this object, skip this light source 
+			float diffuse = dot( ec_nHat, ec_li );
+			if( diffuse > 0.0f )
+			{
 			
-			tmpacc.xyz = kd.xyz * diffuse;
+				//tmpacc.xyz = kd.xyz * diffuse;
+				I_q.xyz += kd.xyz * diffuse * lightStrength[i].xyz;
 
-		        // 2. if viewer on appropriate side of normal vector,
-		        // compute and accumulate specular contribution
-			if( dot( ec_li, ec_nHat ) > 0.0 )
-			{
-				// compute r_i
-				// r_i = 2 * (li dot nhat)*nhat - li
-				vec3 r_i = ec_nHat;
-			 	r_i = r_i * 2;
-				r_i = r_i * dot( ec_li, ec_nHat );
-				r_i = r_i - ec_li;
+		        	// 2. if viewer on appropriate side of normal vector,
+		       		// compute and accumulate specular contribution
+				if( dot( ec_li, ec_nHat ) > 0.0 )
+				{
+					// compute r_i
+					vec3 r_i = ec_nHat;
+			 		r_i = r_i * 2;
+					r_i = r_i * dot( ec_li, ec_nHat );
+					r_i = r_i - ec_li;
 				
-				float specular = pow( max( dot( r_i, ec_v ), 0.0 ), m );
+					float specular = pow( max( dot( r_i, ec_v ), 0.0 ), m );
 
-				tmpacc.xyz += ks.xyz * specular;
-			}
-
-			for( int t = 0; t < 2; ++t )
-			{
-				accumulator[t] += tmpacc[t] * lightStrength[i][t];
-			}
-		    }
+					I_q.xyz += ks.xyz * specular * lightStrength[i].xyz;
+				}
+		    	}
 	      }
-
-	      I_q.xyz += accumulator.xyz;
-
-	      return I_q;	      
+     return I_q;	      
 }
 
 void main ()

@@ -51,7 +51,6 @@ void Sphere::defineSphere()
 {
   _Index = 0;
   tetrahedron( NumTimesToSubdivide );
-  cout << "Index = " << _Index << endl;
 
   glGenVertexArrays( 1, &vao );
   glBindVertexArray( vao );
@@ -139,7 +138,6 @@ void Sphere::tetrahedron( int count )
 
 void Sphere::divide_triangle( const vec3& a, const vec3& b, const vec3& c, int count )
 {
-  cout << "Index = " << _Index << endl;
   /* copied from "Interactive Computer Graphics" by E. Angel, p. 633 */
   if( count > 0 )
     {
