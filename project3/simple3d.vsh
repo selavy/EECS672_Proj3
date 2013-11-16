@@ -31,10 +31,8 @@ uniform float m; // specular coefficient
 
 // END PHONG LIGHTING MODEL //
 
-// TODO: (high priority)
+// TODO: (high priority) ** DONE **
 // remove this light source
-uniform vec3 lightModel =
-	vec3( 0.0, 0.0, 1.0 );
 
 // Per-vertex attributes
 // 1. incoming vertex position in world coordinates
@@ -44,7 +42,7 @@ in vec3 wcNormal; // incoming normal vector in world coordinates
 
 out vec4 colorToFS;
 
-// TODO: (high priority)
+// TODO: (high priority) ** DONE **
 // implement Phong lighting model
 vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 {
@@ -66,9 +64,11 @@ vec4 evaluateLightingModel(in vec3 ec_Q, in vec3 ec_nHat)
 	    }
 	else if( M4x4_ec_lds[1][0] != 0.0f && M4x4_ec_lds[2][0] != 0.0f )
 	    {
-		// oblique
+		// oblique ** DONE **
 		// TODO: (high priority)
-		// how to calc V, should be -D?
+		// how to calc V
+		// not supporting changing D so I know the value a priori
+		ec_v = vec3( 0.0, 0.0995037, 0.995037 );
 	    }
 	else
 	    {

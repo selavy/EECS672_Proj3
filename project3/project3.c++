@@ -1,4 +1,4 @@
-// project2.c++: Starter for EECS 672 Project 2
+// project3.c++: Starter for EECS 672 Project 3
 
 #include <GL/gl.h>
 #include <GL/freeglut.h>

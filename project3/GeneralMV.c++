@@ -62,14 +62,14 @@ using namespace std;
 /* static */ vec4 GeneralMV::_lightPosition[numLights] = {
   { -1.0, 0.0, 0.5, 0.0 }, // source 0: directional
   {  0.0, 1.0, 1.0, 0.0 }, // source 1: directional
-  {  0.0, 0.0, 6.0, 1.0 }  // source 2: positional
+  {  0.0, 0.0, 2.0, 1.0 }  // source 2: positional
 };
 /* static */ float GeneralMV::_lightStrength[3 * numLights] = {
   1.0, 1.0, 1.0, // source 0: 100% strength white
   0.4, 0.4, 0.4, // source 1:  40% strength white
   0.8, 0.8, 0.0  // source 2:  80% strength yellow
 };
-/* static */ vec4 GeneralMV::_ambientStrength = { 0.20, 0.20, 0.20, 1.0 }; // assumed ambient light
+/* static */ vec4 GeneralMV::_ambientStrength = { 0.25, 0.25, 0.25, 1.0 }; // assumed ambient light
 /********************** END PHONG VARS ************************/
 
 // TODO: (high priority) ** DONE **
@@ -132,20 +132,24 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
 // must calculate a bounding sphere and update the projection matrix
 // when the screen is moved.
 
-// TODO: (low priority)
+// TODO: (low priority) (next project)
 // standardize key movements
 // w,a,s,d ==> up, left, down, right
 // z, x ==> zoom in, zoom out
 // w,a,s,d should move spherically (i.e. as if defined in spherical coordinates,
 // should rotate around the image, not just pan horizontally, vertically
+
+// implement by keeping dynamic rotations matrix
+
+// TODO: (low priority) ** DONE **
 // implement min and max for zoom
+
 
   if( key == 'q' )
     {
-      // TODO: (high priority)
+      // TODO: (high priority) ** DONE **
       // switch back
-      // _proj_type = OBLIQUE;
-      _proj_type = ORTHOGONAL;
+       _proj_type = OBLIQUE;
     }
   else if( key == 'o' )
     {
@@ -179,7 +183,10 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
   else if( key == 'z' )
     {
       // TODO: (med priority)
-      // zoom by moving frustum in _perspective
+      // zoom by moving zpp in _perspective
+
+      // this is not correct.  zoom should be implemented by changing the width and height of frustum
+      // will correct in next project
       if( _frustum > MAXZOOM )
 	_frustum -= MOVESPEED;
       else
@@ -197,7 +204,7 @@ void GeneralMV::handleCommand( unsigned char key, double ldsX, double ldsY )
   printBox();
 } /* end GeneralMV::handleCommand() */
 
-// TODO: (high priority)
+// TODO: (high priority) ** DONE **
 // Calculate a bounding sphere to determine bounding box for projection functions
 void GeneralMV::calcBoundingSphere()
 {
@@ -327,7 +334,7 @@ void GeneralMV::getMatrices( double limits[6] )
 	       _model_view
 	       );
 
-  // TODO: (high priority)
+  // TODO: (high priority) ** DONE **
   // Change the projection matrix based upon _proj_type
   if( _proj_type == ORTHOGONAL )
     {
@@ -339,10 +346,14 @@ void GeneralMV::getMatrices( double limits[6] )
 		 );
   
     }
-  // else if( _proj_type == OBLIQUE )
-  //  {
-  //     oblique( zpp, xmin, xmax, ymin, ymax, zmin, zmax, dx, dy, dz, m[] ); length(m) == 16
-  //  }
+  else if( _proj_type == OBLIQUE )
+    {
+      // just using constant for D since I don't really care about oblique projection
+      float dx = 0.0f;
+      float dy = 0.0995037;
+      float dz = 0.995037;
+      oblique( _zpp, _ecmin[0], _ecmax[0], _ecmin[1], _ecmax[1], _ecmin[2], _ecmax[2], dx, dy, dz, _projection );
+    }
   else //( _proj_type == PERSPECTIVE )
     {
       perspective( _zpp, _ecmin[0], _ecmax[0], _ecmin[1], _ecmax[1], _ecmin[2], _ecmax[2], _projection ); // length(m) == 16
