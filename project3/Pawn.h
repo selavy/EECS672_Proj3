@@ -17,22 +17,22 @@ class Pawn : public GeneralMV
 {
 public:
   Pawn( int color, vec3 corner );
-	virtual ~Pawn();
+  virtual ~Pawn();
 
-	// xyzLimits: {wcXmin, wcXmax, wcYmin, wcYmax, wcZmin, wcZmax}
-	void getWCBoundingBox(double* xyzLimitsF) const;
-	void defineModel();
-	void render();
+  // xyzLimits: {wcXmin, wcXmax, wcYmin, wcYmax, wcZmin, wcZmax}
+  void getWCBoundingBox(double* xyzLimitsF) const;
+  void defineModel();
+  void render();
 	
 private:
-	GLuint vao;
-	GLuint vbo[2]; //!> 0: coordinate data, 1: normals
+  GLuint vao;
+  GLuint vbo[2]; //!> 0: coordinate data, 1: normals
 	
-	double _limits[6];
-
-	Cylinder * _midsection;
-	Sphere * _top;
-	int _color;
+  double _limits[6];
+  
+  Cylinder * _midsection;
+  Sphere * _top;
+  int _color;
 };
 
 #endif

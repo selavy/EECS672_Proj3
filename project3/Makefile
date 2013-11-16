@@ -6,7 +6,7 @@ LINK = g++ -fPIC -g
 LOCAL_UTIL_LIBRARIES = -L../lib -lcryph -lfont -lglsl -lmvc
 OGL_LIBRARIES = -lglut -lGLU -lGL
 
-OBJS = project3.o MatrixIF.o GeneralMV.o Square.o Board.o Pawn.o King.o Cylinder.o Sphere.o
+OBJS = project3.o MatrixIF.o GeneralMV.o Square.o Board.o Pawn.o King.o Cylinder.o Sphere.o Bishop.o
 
 all: project3
 	./project3
@@ -44,6 +44,8 @@ Cylinder.o: Cylinder.h Cylinder.c++
 	$(CPP) $(C_FLAGS) Cylinder.c++
 Sphere.o: Sphere.h Sphere.c++
 	$(CPP) $(C_FLAGS) Sphere.c++
+Bishop.o: Bishop.h Bishop.c++
+	$(CPP) $(C_FLAGS) Bishop.c++
 
 clean:
 	rm -f *~ *.o project3

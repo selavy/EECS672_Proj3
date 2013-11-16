@@ -16,31 +16,31 @@ Pawn::Pawn(
   _points = new vec3[ PWN_VERTICES ];
   _normals = new vec3[ PWN_VERTICES ];
 
-#define BWIDTH 5.0f
-#define MWIDTH 3.0f
-#define TWIDTH 4.0f
-#define PIN ((BWIDTH - MWIDTH) / 2.0f)
-#define TIN ((BWIDTH - TWIDTH) / 2.0f)
-#define BHEIGHT 1.8f
-#define PHEIGHT 1.0f
-#define MHEIGHT 2.5f
-#define THEIGHT 1.0f
+  const double BWIDTH = 5.0f;
+  const double  MWIDTH = 3.0f;
+  const double TWIDTH = 4.0f;
+  const double PIN = ((BWIDTH - MWIDTH) / 2.0f);
+  const double TIN = ((BWIDTH - TWIDTH) / 2.0f);
+  const double BHEIGHT = 1.8f;
+  const double PHEIGHT = 1.0f;
+  const double MHEIGHT = 2.5f;
+  const double THEIGHT = 1.0f;
 
-#define STARTP (BHEIGHT)
-#define STARTM (BHEIGHT + PHEIGHT)
-#define STARTT (STARTM + MHEIGHT)
-#define ENDT (STARTT + THEIGHT)
+  const double STARTP = (BHEIGHT);
+  const double STARTM = (BHEIGHT + PHEIGHT);
+  const double STARTT = (STARTM + MHEIGHT);
+  const double ENDT = (STARTT + THEIGHT);
 
-#define PLEFTT (PIN)
-#define PRGHTT (BWIDTH-PIN)
-#define PLEFTB 0
-#define PRGHTB (BWIDTH)
-#define MLEFT (PIN)
-#define MRGHT (BWIDTH-PIN)
-#define TLEFT (TIN)
-#define TRGHT (BWIDTH-TIN)
+  const double PLEFTT = (PIN);
+  const double PRGHTT = (BWIDTH-PIN);
+  const double PLEFTB = 0;
+  const double PRGHTB = (BWIDTH);
+  const double MLEFT = (PIN);
+  const double MRGHT = (BWIDTH-PIN);
+  const double TLEFT = (TIN);
+  const double TRGHT = (BWIDTH-TIN);
 
-  // TODO
+  // TODO ** DONE **
   vec3 tmp[PWN_CORNERS] = {
     // base
     { corner[0],          corner[1],           corner[2]          },
@@ -62,41 +62,13 @@ Pawn::Pawn(
     { corner[0] + PRGHTT, corner[1] +  STARTM, corner[2] + PRGHTT },
     { corner[0] + PRGHTB, corner[1] +  STARTP, corner[2] + PRGHTB },
 
-    /*
-    // mid section
-    { corner[0] + MLEFT, corner[1] + STARTM, corner[2] + MLEFT },
-    { corner[0] + MLEFT, corner[1] + STARTT, corner[2] + MLEFT },
-    { corner[0] + MRGHT, corner[1] + STARTT, corner[2] + MLEFT },
-    { corner[0] + MRGHT, corner[1] + STARTM, corner[2] + MLEFT },
-    { corner[0] + MLEFT, corner[1] + STARTM, corner[2] + MRGHT },
-    { corner[0] + MLEFT, corner[1] + STARTT, corner[2] + MRGHT },
-    { corner[0] + MRGHT, corner[1] + STARTT, corner[2] + MRGHT },
-    { corner[0] + MRGHT, corner[1] + STARTM, corner[2] + MRGHT },
-    */
-
-    // top
-    /*
-    { corner[0] + TLEFT, corner[1] + STARTT, corner[2] + TLEFT },
-    { corner[0] + TLEFT, corner[1] + ENDT,   corner[2] + TLEFT },
-    { corner[0] + TRGHT, corner[1] + ENDT,   corner[2] + TLEFT },
-    { corner[0] + TRGHT, corner[1] + STARTT, corner[2] + TLEFT },
-    { corner[0] + TLEFT, corner[1] + STARTT, corner[2] + TRGHT },
-    { corner[0] + TLEFT, corner[1] + ENDT,   corner[2] + TRGHT },
-    { corner[0] + TRGHT, corner[1] + ENDT,   corner[2] + TRGHT },
-    { corner[0] + TRGHT, corner[1] + STARTT, corner[2] + TRGHT },
-    */
-
   };
+
   vec3 cylindercorner;
   cylindercorner[0] = corner[0] + MWIDTH / 1.2f;
   cylindercorner[2] = corner[2] + MWIDTH / 1.2f;
   cylindercorner[1] = corner[1] + MHEIGHT;
 
-  /*
-  corner[0] += MWIDTH / 1.2f;
-  corner[2] += MWIDTH / 1.2f;
-  corner[1] += MHEIGHT;
-  */
   _midsection = new Cylinder( cylindercorner, 1.5, 2.5, color );
 
   vec3 topcorner;
